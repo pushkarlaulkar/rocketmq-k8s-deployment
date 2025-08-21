@@ -1,0 +1,178 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: broker-config
+  namespace: your-namespace
+data:
+  broker.conf: |
+    brokerClusterName = DefaultCluster
+    brokerName = broker-a
+    brokerId = 0
+    deleteWhen = 04
+    fileReservedTime = 48
+    brokerRole = ASYNC_MASTER
+    flushDiskType = ASYNC_FLUSH
+    namesrvAddr = rmqnamesrv:9876
+    brokerIP1 = 0.0.0.0
+    listenPort = 10911
+    autoCreateTopicEnable = true
+    brokerPermission = 6
+    enableProxy = true
+    aclEnable=false
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rmqnamesrv
+  namespace: your-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rmqnamesrv
+  template:
+    metadata:
+      labels:
+        app: rmqnamesrv
+    spec:
+      imagePullSecrets:
+      - name: azure-container-registry
+      containers:
+      - name: namesrv
+        image: acrbtconnectivityuaen.azurecr.io/apache/rocketmq:5.3.2
+        command: ["sh", "mqnamesrv"]
+        ports:
+        - containerPort: 9876
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rmqnamesrv
+  namespace: your-namespace
+spec:
+  selector:
+    app: rmqnamesrv
+  ports:
+  - name: namesrv
+    port: 9876
+    targetPort: 9876
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rmqbroker
+  namespace: your-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rmqbroker
+  template:
+    metadata:
+      labels:
+        app: rmqbroker
+    spec:
+      imagePullSecrets:
+      - name: azure-container-registry
+      containers:
+      - name: broker
+        image: acrbtconnectivityuaen.azurecr.io/apache/rocketmq:5.3.2
+        command: ["sh", "mqbroker", "-c", "/home/rocketmq/rocketmq-5.3.2/conf/broker.conf"]
+        ports:
+          - containerPort: 10909
+          - containerPort: 10911
+          - containerPort: 10912
+        env:
+          - name: NAMESRV_ADDR
+            value: "rmqnamesrv:9876"
+        volumeMounts:
+          - name: broker-configmap
+            mountPath: /home/rocketmq/rocketmq-5.3.2/conf
+          - name: broker-storage
+            mountPath: /home/rocketmq/store   # same path as in Docker
+      volumes:
+        - name: broker-configmap
+          configMap:
+            name: broker-config
+        - name: broker-storage
+          persistentVolumeClaim:
+            claimName: rmqbroker-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rmqbroker-pvc
+  namespace: your-namespace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi   # adjust size as needed
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rmqbroker
+  namespace: your-namespace
+spec:
+  selector:
+    app: rmqbroker
+  ports:
+  - name: broker-listen
+    port: 10909
+    targetPort: 10909
+  - name: broker-main
+    port: 10911
+    targetPort: 10911
+  - name: broker-ha
+    port: 10912
+    targetPort: 10912
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rmqconsole
+  namespace: your-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rmqconsole
+  template:
+    metadata:
+      labels:
+        app: rmqconsole
+    spec:
+      imagePullSecrets:
+      - name: azure-container-registry
+      containers:
+      - name: console
+        image: acrbtconnectivityuaen.azurecr.io/apacherocketmq/rocketmq-dashboard:2.0.1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: JAVA_OPTS
+          value: "-Drocketmq.namesrv.addr=rmqnamesrv:9876"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rmqconsole
+  namespace: your-namespace
+spec:
+  type: ClusterIP 
+  selector:
+    app: rmqconsole
+  ports:
+  - name: console-web
+    port: 8080
+    targetPort: 8080
