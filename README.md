@@ -6,4 +6,24 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
 
    ```
    az aks show -g <CLUSTER_RG> -n <CLUSTER_NAME> --query identity
-   ``` 
+   ```
+   Output should be similar to below
+
+   ```
+   {
+     "delegatedResources": null,
+     "principalId": "your-principal-id",
+     "tenantId": "your-tenant-id",
+     "type": "SystemAssigned",
+     "userAssignedIdentities": null
+   }
+   ```
+
+3. Grant Contributor Role to the principal id by running below command
+
+   ```
+   az role assignment create \
+   --assignee your-principal-id \
+   --role "Contributor" \
+   --scope /subscriptions/<SUB_ID>/resourceGroups/<Resource_Group>
+   ```
