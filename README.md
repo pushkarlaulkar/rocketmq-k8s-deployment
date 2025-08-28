@@ -27,3 +27,26 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
    --role "Contributor" \
    --scope /subscriptions/<SUB_ID>/resourceGroups/<Resource_Group>
    ```
+
+   Output should be similar to below
+
+   ```
+   {
+     "condition": null,
+     "conditionVersion": null,
+     "createdBy": null,
+     "createdOn": "2025-08-28T13:00:31.660292+00:00",
+     "delegatedManagedIdentityResourceId": null,
+     "description": null,
+     "id": "/subscriptions/<SUB_ID>/resourceGroups/<Resource_Group>/providers/Microsoft.Authorization/roleAssignments/role-id",
+     "name": "role-id",
+     "principalId": "your-principal-id",
+     "principalType": "ServicePrincipal",
+     "resourceGroup": "<Resource_Group>",
+     "roleDefinitionId": "/subscriptions/<SUB_ID>/providers/Microsoft.Authorization/roleDefinitions/role-definition-id",
+     "scope": "/subscriptions/<SUB_ID>/resourceGroups/<Resource_Group>",
+     "type": "Microsoft.Authorization/roleAssignments",
+     "updatedBy": "updated-by-id",
+     "updatedOn": "2025-08-28T13:00:32.054293+00:00"
+   }
+   ```
