@@ -62,3 +62,19 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
    ```
    kubectl apply -f pvc.yaml
    ```
+
+6. Make sure PVC is bound to the PV. Output should be similar as below
+
+   ```
+   NAME                            CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                          STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE    VOLUMEMODE
+   persistentvolume/rmqbroker-pv   256Gi      RWO            Retain           Bound    your-namespace/rmqbroker-pvc                  <unset>                          6h9m   Filesystem
+   
+   NAME                                  STATUS   VOLUME         CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE     VOLUMEMODE
+   persistentvolumeclaim/rmqbroker-pvc   Bound    rmqbroker-pv   256Gi      RWO                           <unset>                 5h50m   Filesystem
+   ```
+
+7. Finally apply the deployment
+
+   ```
+   kubectl apply -f rocketmq.yaml
+   ```
