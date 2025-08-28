@@ -50,3 +50,9 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
      "updatedOn": "2025-08-28T13:00:32.054293+00:00"
    }
    ```
+
+4. Create PV by applying below command
+
+   ```
+   kubectl apply -f pv.yaml
+   ```
