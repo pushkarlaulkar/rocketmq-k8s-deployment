@@ -56,3 +56,9 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
    ```
    kubectl apply -f pv.yaml
    ```
+
+5. Create PVC
+
+   ```
+   kubectl apply -f pvc.yaml
+   ```
