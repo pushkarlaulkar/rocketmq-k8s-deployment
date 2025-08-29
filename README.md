@@ -4,6 +4,12 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
 
 2. Check AKS cluster identity by running below command. The System assigned or User Assigned Identity needs permission to bind to the Azure Disk
 
+   Switch to the correct subscription
+
+   ```
+   az account set -s your-subscription-id
+   ```
+   
    ```
    az aks show -g <CLUSTER_RG> -n <CLUSTER_NAME> --query identity
    ```
@@ -19,7 +25,7 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
    }
    ```
 
-3. Grant Contributor Role to the principal id by running below command
+4. Grant Contributor Role to the principal id by running below command
 
    ```
    az role assignment create \
@@ -51,19 +57,19 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
    }
    ```
 
-4. Create PV by applying below command
+5. Create PV by applying below command
 
    ```
    kubectl apply -f pv.yaml
    ```
 
-5. Create PVC
+6. Create PVC
 
    ```
    kubectl apply -f pvc.yaml
    ```
 
-6. Make sure PVC is bound to the PV. Output should be similar as below
+7. Make sure PVC is bound to the PV. Output should be similar as below
 
    ```
    NAME                            CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                          STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE    VOLUMEMODE
@@ -73,7 +79,7 @@ Steps to deploy **RocketMQ** as Kuberenetes Deployment with **Azure Disk** as da
    persistentvolumeclaim/rmqbroker-pvc   Bound    rmqbroker-pv   256Gi      RWO                           <unset>                 5h50m   Filesystem
    ```
 
-7. Finally apply the deployment
+8. Finally apply the deployment
 
    ```
    kubectl apply -f rocketmq.yaml
